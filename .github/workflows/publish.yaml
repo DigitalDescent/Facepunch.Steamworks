@@ -48,22 +48,22 @@ jobs:
     
       # Restore dependencies
       - name: Restore Dependencies
-        run: dotnet restore Facepunch.Steamworks/Facepunch.Steamworks.${{ matrix.target }}.csproj
+        run: dotnet restore Facepunch.Steamworks\Facepunch.Steamworks.${{ matrix.target }}.csproj
 
       # Build (Release)
       - name: Build ${{ matrix.target }} Release
-        run: dotnet build Facepunch.Steamworks/Facepunch.Steamworks.${{ matrix.target }}.csproj --configuration Release
+        run: dotnet build Facepunch.Steamworks\Facepunch.Steamworks.${{ matrix.target }}.csproj --configuration Release
 
       # Package (NuGet)
       - name: Package ${{ matrix.target }}
-        run: dotnet pack Facepunch.Steamworks/Facepunch.Steamworks.${{ matrix.target }}.csproj --configuration Release
+        run: dotnet pack Facepunch.Steamworks\Facepunch.Steamworks.${{ matrix.target }}.csproj --configuration Release
 
       # Publish packages to AWS CodeArtifact
       - name: Publish NuGet Package
         shell: pwsh
         run: |
           echo "Publishing NuGet package to AWS CodeArtifact..."
-          dotnet nuget push Facepunch.Steamworks/bin/Release/*.nupkg `
+          dotnet nuget push .\Facepunch.Steamworks\bin\Release\*.nupkg `
             --source aws-codeartifact `
             --api-key "$env:CODEARTIFACT_AUTH_TOKEN"
     
