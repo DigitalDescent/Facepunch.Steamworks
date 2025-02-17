@@ -40,7 +40,7 @@ jobs:
           $env:CODEARTIFACT_AUTH_TOKEN = $(aws codeartifact get-authorization-token --domain ${{ secrets.AWS_CODEARTIFACT_DOMAIN }} --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text)
           
           echo "Setting up AWS CodeArtifact NuGet source..."
-          dotnet nuget add source "https://${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.${{ secrets.AWS_REGION }}.amazonaws.com/nuget/${{ secrets.CODEARTIFACT_REPO_NAME }}/" `
+          dotnet nuget add source "https://${{ secrets.AWS_CODEARTIFACT_DOMAIN }}-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.${{ secrets.AWS_REGION }}.amazonaws.com/nuget/${{ secrets.CODEARTIFACT_REPO_NAME }}/v3/index.json" `
             --username "aws" `
             --password "$env:CODEARTIFACT_AUTH_TOKEN" `
             --store-password-in-clear-text `
