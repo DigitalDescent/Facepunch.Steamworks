@@ -34,11 +34,18 @@ jobs:
     
       # Login to AWS CodeArtifact
       - name: Authenticate with AWS CodeArtifact
+        shell: pwsh
         run: |
           echo "Authenticating with AWS CodeArtifact..."
-          $CODEARTIFACT_AUTH_TOKEN = aws codeartifact get-authorization-token --domain ${{ secrets.AWS_CODEARTIFACT_DOMAIN }} --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text
-          dotnet nuget add source --username aws --password $CODEARTIFACT_AUTH_TOKEN --store-password-in-clear-text --name aws-codeartifact "https://${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.${{ secrets.AWS_REGION }}.amazonaws.com/nuget/${{ secrets.CODEARTIFACT_REPO_NAME }}/"
-
+          $env:CODEARTIFACT_AUTH_TOKEN = $(aws codeartifact get-authorization-token --domain ${{ secrets.AWS_CODEARTIFACT_DOMAIN }} --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text)
+          
+          echo "Setting up AWS CodeArtifact NuGet source..."
+          dotnet nuget add source "https://${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.${{ secrets.AWS_REGION }}.amazonaws.com/nuget/${{ secrets.CODEARTIFACT_REPO_NAME }}/" `
+            --username "aws" `
+            --password "$env:CODEARTIFACT_AUTH_TOKEN" `
+            --store-password-in-clear-text `
+            --name aws-codeartifact
+    
       # Restore dependencies
       - name: Restore Dependencies
         run: dotnet restore Facepunch.Steamworks/Facepunch.Steamworks.${{ matrix.target }}.csproj
@@ -53,5 +60,10 @@ jobs:
 
       # Publish packages to AWS CodeArtifact
       - name: Publish NuGet Package
+        shell: pwsh
         run: |
-          dotnet nuget push Facepunch.Steamworks/bin/Release/*.nupkg --source aws-codeartifact --api-key $CODEARTIFACT_AUTH_TOKEN
+          echo "Publishing NuGet package to AWS CodeArtifact..."
+          dotnet nuget push Facepunch.Steamworks/bin/Release/*.nupkg `
+            --source aws-codeartifact `
+            --api-key "$env:CODEARTIFACT_AUTH_TOKEN"
+    
